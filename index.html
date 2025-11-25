@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Salon des Inconnus - Outil d'appréciation et d'ouverture de dossier</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+            },
+            colors: {
+              brand: {
+                black: '#000000',
+                metal: '#1c1c1e', // Space Grey
+                titanium: '#2C2C2E', // Lighter metal
+                silver: '#E5E5EA',
+                subtleBlue: '#5E5CE6', // Indigo doux
+                subtleOrange: '#FF9F0A', // Orange brulé doux
+              }
+            },
+            backgroundImage: {
+              'metallic': 'linear-gradient(145deg, #1c1c1e 0%, #000000 100%)',
+              'glass': 'linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%)',
+              'glass-card': 'linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%)',
+            },
+            animation: {
+              'fade-in': 'fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+              'slide-in': 'slideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+              'pulse-slow': 'pulse 8s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              'shimmer': 'shimmer 3s linear infinite',
+              'float': 'float 18s ease-in-out infinite',
+              'float-delayed': 'float 22s ease-in-out infinite reverse',
+              'float-slow': 'float 25s ease-in-out infinite',
+            },
+            keyframes: {
+              fadeIn: {
+                '0%': { opacity: '0' },
+                '100%': { opacity: '1' },
+              },
+              slideIn: {
+                '0%': { opacity: '0', transform: 'translateY(15px)' },
+                '100%': { opacity: '1', transform: 'translateY(0)' },
+              },
+              shimmer: {
+                '0%': { backgroundPosition: '-1000px 0' },
+                '100%': { backgroundPosition: '1000px 0' }
+              },
+              float: {
+                '0%, 100%': { transform: 'translate(0, 0) scale(1)' },
+                '33%': { transform: 'translate(100px, -150px) scale(1.2)' },
+                '66%': { transform: 'translate(-80px, 80px) scale(0.9)' },
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      body {
+        background-color: #000000;
+        color: #F5F5F7;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      /* Custom selection color - Metallic Blue/Orange mix */
+      ::selection {
+        background: rgba(255, 159, 10, 0.3);
+        color: #FFFFFF;
+      }
+      /* Hide standard scrollbar */
+      ::-webkit-scrollbar {
+        width: 0px;
+        background: transparent;
+      }
+      /* Clean input number spinners */
+      input::-webkit-outer-spin-button,
+      input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+      input[type=number] {
+        -moz-appearance: textfield;
+      }
+      /* Input reset for autofill to keep clean background */
+      input:-webkit-autofill,
+      input:-webkit-autofill:hover, 
+      input:-webkit-autofill:focus, 
+      textarea:-webkit-autofill,
+      textarea:-webkit-autofill:hover,
+      textarea:-webkit-autofill:focus {
+        -webkit-box-shadow: 0 0 0px 1000px #1c1c1e inset;
+        -webkit-text-fill-color: white;
+        transition: background-color 5000s ease-in-out 0s;
+      }
+      
+      .metallic-border {
+        position: relative;
+        background: rgba(18, 18, 18, 0.6);
+        backdrop-filter: blur(40px);
+        background-clip: padding-box;
+        border: 1px solid transparent;
+        border-radius: 1.5rem;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      }
+      
+      /* Bordure dégradée métallique "Entre-deux" : Plus visible que le précédent, moins saturé que le premier */
+      .metallic-border::before {
+        content: '';
+        position: absolute;
+        top: 0; right: 0; bottom: 0; left: 0;
+        z-index: -1;
+        margin: -1px;
+        border-radius: inherit;
+        background: linear-gradient(150deg, rgba(255,255,255,0.2) 0%, rgba(94, 92, 230, 0.25) 30%, rgba(0,0,0,0) 50%, rgba(255, 159, 10, 0.25) 70%, rgba(255,255,255,0.1) 100%);
+      }
+
+      /* Effet de brillance au survol pour les boutons */
+      .btn-shine {
+        position: relative;
+        overflow: hidden;
+      }
+      .btn-shine::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+        transition: 0.5s;
+      }
+      .btn-shine:hover::after {
+        left: 100%;
+      }
+
+      /* PRINT STYLES FIX */
+      @media print {
+        body, html {
+          background-color: white !important;
+          color: black !important;
+          height: 100% !important;
+          width: 100% !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          overflow: visible !important;
+        }
+
+        /* Hide everything in the body by default using visibility.
+           This preserves layout flow but hides the pixels, avoiding React mount issues. */
+        body * {
+          visibility: hidden;
+        }
+
+        /* Make the specific print container and all its descendants visible */
+        #printable-sheet, #printable-sheet * {
+          visibility: visible;
+        }
+
+        /* Position the sheet absolutely at the top left to fill the paper */
+        #printable-sheet {
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 100%;
+          margin: 0;
+          padding: 0;
+          box-shadow: none !important;
+          border: none !important;
+          background-color: white !important;
+          color: black !important;
+        }
+
+        /* Explicitly hide buttons and other UI elements that shouldn't print */
+        button, .no-print, header, footer {
+          display: none !important;
+        }
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.554.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0"
+  }
+}
+</script>
+</head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
